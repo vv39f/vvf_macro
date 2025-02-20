@@ -1,1 +1,184 @@
-v3.9
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Настройки
+local SPAWN_RADIUS = 50 -- Радиус спавна дамми
+local GLITCH_INTERVAL = 0.1 -- Интервал дергания дамми -- Урон при касании
+local NAME_CHANGE_INTERVAL = 0.01 -- Интервал изменения имени дамми
+
+-- Функция для генерации случайного имени
+local function generateRandomName(length)
+	local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!№#$%^&№№№№№№№№№№№№;%:?*\\/-=+~`"
+	local randomName = ""
+	for i = 1, length do
+		local randomIndex = math.random(1, #chars)
+		randomName = randomName .. string.sub(chars, randomIndex, randomIndex)
+	end
+	return randomName
+end
+
+-- Функция для создания дамми
+local function createDummy()
+	-- Создаём модель дамми
+	local dummy = Instance.new("Model")
+	dummy.Name = "GlitchDummy"
+
+	-- Добавляем Humanoid
+	local humanoid = Instance.new("Humanoid")
+	humanoid.Parent = dummy
+
+	-- Добавляем части (туловище, голова, руки, ноги)
+	local torso = Instance.new("Part")
+	torso.Name = "Torso"
+	torso.Size = Vector3.new(2, 2, 1)
+	torso.BrickColor = BrickColor.new("Really black")
+	torso.Material = Enum.Material.Neon
+	torso.Anchored = true
+	torso.CanCollide = false
+	torso.Parent = dummy
+
+	local head = Instance.new("Part")
+	head.Name = "Head"
+	head.Size = Vector3.new(2, 1, 1)
+	head.BrickColor = BrickColor.new("Really black")
+	head.Material = Enum.Material.Neon
+	head.Anchored = true
+	head.CanCollide = false
+	head.Parent = dummy
+
+	local leftArm = Instance.new("Part")
+	leftArm.Name = "LeftArm"
+	leftArm.Size = Vector3.new(1, 2, 1)
+	leftArm.BrickColor = BrickColor.new("Really black")
+	leftArm.Material = Enum.Material.Neon
+	leftArm.Anchored = true
+	leftArm.CanCollide = false
+	leftArm.Parent = dummy
+
+	local rightArm = Instance.new("Part")
+	rightArm.Name = "RightArm"
+	rightArm.Size = Vector3.new(1, 2, 1)
+	rightArm.BrickColor = BrickColor.new("Really black")
+	rightArm.Material = Enum.Material.Neon
+	rightArm.Anchored = true
+	rightArm.CanCollide = false
+	rightArm.Parent = dummy
+
+	local leftLeg = Instance.new("Part")
+	leftLeg.Name = "LeftLeg"
+	leftLeg.Size = Vector3.new(1, 2, 1)
+	leftLeg.BrickColor = BrickColor.new("Really black")
+	leftLeg.Material = Enum.Material.Neon
+	leftLeg.Anchored = true
+	leftLeg.CanCollide = false
+	leftLeg.Parent = dummy
+
+	local rightLeg = Instance.new("Part")
+	rightLeg.Name = "RightLeg"
+	rightLeg.Size = Vector3.new(1, 2, 1)
+	rightLeg.BrickColor = BrickColor.new("Really black")
+	rightLeg.Material = Enum.Material.Neon
+	rightLeg.Anchored = true
+	rightLeg.CanCollide = false
+	rightLeg.Parent = dummy
+
+	-- Устанавливаем PrimaryPart
+	dummy.PrimaryPart = torso
+
+	-- Позиционируем части относительно туловища
+	head.Position = torso.Position + Vector3.new(0, 1.5, 0)
+	leftArm.Position = torso.Position + Vector3.new(-1.5, 0, 0)
+	rightArm.Position = torso.Position + Vector3.new(1.5, 0, 0)
+	leftLeg.Position = torso.Position + Vector3.new(-0.5, -2, 0)
+	rightLeg.Position = torso.Position + Vector3.new(0.5, -2, 0)
+
+	-- Спавним дамми в случайном месте на радиусе
+	local spawnPosition = rootPart.Position + Vector3.new(
+		math.random(-SPAWN_RADIUS, SPAWN_RADIUS),
+		0,
+		math.random(-SPAWN_RADIUS, SPAWN_RADIUS)
+	)
+	dummy:SetPrimaryPartCFrame(CFrame.new(spawnPosition))
+
+	-- Добавляем дамми в игру
+	dummy.Parent = workspace
+
+	return dummy
+end
+
+-- Функция для "глючного" поведения дамми
+local function glitchDummy(dummy)
+	while dummy and dummy.Parent do
+		-- Дёргаем дамми
+		local offset = Vector3.new(
+			math.random(-0.5, 0.5),
+			math.random(-0.5, 0.5),
+			math.random(-0.5, 0.5)
+		)
+		dummy:SetPrimaryPartCFrame(dummy.PrimaryPart.CFrame + offset)
+
+		-- Заставляем дамми смотреть на игрока
+		if player.Character and player.Character.PrimaryPart then
+			local lookAt = CFrame.lookAt(dummy.PrimaryPart.Position, player.Character.PrimaryPart.Position)
+			dummy:SetPrimaryPartCFrame(lookAt)
+		end
+
+		RunService.Heartbeat:Wait(GLITCH_INTERVAL)
+	end
+end
+
+-- Функция для изменения имени дамми
+local function changeDummyName(dummy)
+	while dummy and dummy.Parent do
+		-- Генерируем случайное имя
+		local randomName = generateRandomName(10) -- 10 символов
+		dummy.Name = randomName
+
+		-- Ждём указанный интервал
+		RunService.Heartbeat:Wait(NAME_CHANGE_INTERVAL)
+	end
+end
+
+
+local function chance()
+	wait(5)
+	-- Создаём эффект ColorCorrection
+	local colro = Instance.new('ColorCorrectionEffect', game.Lighting)
+	colro.Enabled = false
+	colro.Brightness = 0
+	colro.Contrast = 0
+	colro.Saturation = 0
+
+	-- Создаём твины для эффекта
+	local tween = TweenService:Create(colro, TweenInfo.new(5), {Contrast = 300})
+	local tween2 = TweenService:Create(colro, TweenInfo.new(3), {Saturation = 35})
+	local tween3 = TweenService:Create(colro, TweenInfo.new(1), {Brightness = -1})
+
+	-- Включаем эффект и запускаем твины
+	colro.Enabled = true
+	colro.TintColor = Color3.new(255, 0, 0)
+	tween:Play()
+	tween2:Play()
+	tween3:Play()
+	
+	local Sound = Instance.new('Sound', game.SoundService)
+	Sound.SoundId = 'rbxassetid://5159141859'
+	Sound.Volume = 5
+	Sound.Playing = true
+	
+	wait(15)
+	player:Kick('W^\h&a***T!?')
+end
+
+-- Создаём дамми и настраиваем его поведение
+local dummy = createDummy()-- Подключаем обработчик касания
+
+-- Запускаем все функции для дамми
+coroutine.wrap(glitchDummy)(dummy) -- Запускаем "глючное" поведение в отдельном потоке
+coroutine.wrap(changeDummyName)(dummy)
+chance()-- Запускаем изменение имени в отдельном потоке
