@@ -7,7 +7,7 @@ local character = player.Character or player.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
 
 -- Настройки
-local SPAWN_RADIUS = 50 -- Радиус спавна дамми
+local SPAWN_RADIUS = 20 -- Радиус спавна дамми
 local GLITCH_INTERVAL = 0.1 -- Интервал дергания дамми -- Урон при касании
 local NAME_CHANGE_INTERVAL = 0.01 -- Интервал изменения имени дамми
 
